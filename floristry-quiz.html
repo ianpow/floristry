@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>City & Guilds Level 2 Floristry – Practice Quiz</title>
+<style>
+  :root {
+    --green:  #2d6a4f;
+    --green2: #40916c;
+    --green3: #74c69d;
+    --green4: #d8f3dc;
+    --pink:   #e63946;
+    --pink2:  #ffd6d9;
+    --gold:   #e9c46a;
+    --gold2:  #fff3cd;
+    --grey:   #f1f3f5;
+    --text:   #1b1b2f;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #e8f5e9 0%, #fce4ec 100%);
+    min-height: 100vh;
+    color: var(--text);
+    padding: 20px;
+  }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  header h1 {
+    font-size: 1.9rem;
+    color: var(--green);
+    line-height: 1.25;
+  }
+  header p {
+    color: #555;
+    margin-top: 6px;
+    font-size: 0.95rem;
+  }
+  .flower-strip {
+    font-size: 1.6rem;
+    letter-spacing: 6px;
+    margin: 8px 0;
+  }
+
+  /* ── Section nav tabs ── */
+  #section-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .tab-btn {
+    padding: 7px 14px;
+    border: 2px solid var(--green2);
+    border-radius: 20px;
+    background: #fff;
+    color: var(--green);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover  { background: var(--green4); }
+  .tab-btn.active { background: var(--green2); color: #fff; border-color: var(--green2); }
+  .tab-btn.done   { background: var(--green4); border-color: var(--green); color: var(--green); }
+  .tab-btn.done::after { content: " ✓"; }
+
+  /* ── Quiz card ── */
+  #quiz-area {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  .section-header {
+    background: var(--green);
+    color: #fff;
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 14px 20px;
+  }
+  .section-header h2 { font-size: 1.15rem; }
+  .section-header p  { font-size: 0.82rem; opacity: 0.85; margin-top: 3px; }
+
+  .progress-bar-wrap {
+    background: rgba(255,255,255,0.3);
+    border-radius: 4px;
+    height: 6px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    background: var(--gold);
+    height: 100%;
+    transition: width 0.4s ease;
+  }
+
+  /* ── Question block ── */
+  .question-block {
+    background: #fff;
+    border-left: 4px solid var(--green2);
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    padding: 20px 22px;
+    transition: opacity 0.25s;
+  }
+  .question-block:last-of-type {
+    border-radius: 0 0 var(--radius) var(--radius);
+  }
+  .q-number {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--green2);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .q-text {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+
+  /* ── Options ── */
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 2px solid #dce8dc;
+    border-radius: var(--radius);
+    background: var(--grey);
+    cursor: pointer;
+    font-size: 0.93rem;
+    text-align: left;
+    transition: all 0.18s;
+  }
+  .option-btn:hover:not([disabled]) { border-color: var(--green2); background: var(--green4); }
+  .option-btn .opt-label {
+    font-weight: 700;
+    color: var(--green);
+    min-width: 22px;
+  }
+  .option-btn.correct  { border-color: var(--green);  background: #d4edda; }
+  .option-btn.wrong    { border-color: var(--pink);   background: var(--pink2); }
+  .option-btn.reveal   { border-color: var(--green2); background: var(--green4); }
+  .option-btn[disabled]{ cursor: default; }
+
+  /* ── Feedback / hint ── */
+  .feedback {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    font-size: 0.88rem;
+    line-height: 1.55;
+    display: none;
+  }
+  .feedback.correct-fb { background: #d4edda; border-left: 4px solid var(--green); color: #155724; }
+  .feedback.wrong-fb   { background: var(--pink2); border-left: 4px solid var(--pink); color: #721c24; }
+  .feedback.show { display: block; }
+
+  .hint-btn {
+    margin-top: 10px;
+    background: none;
+    border: 1px dashed var(--green2);
+    color: var(--green2);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .hint-btn:hover { background: var(--green4); }
+  .hint-box {
+    margin-top: 8px;
+    padding: 9px 13px;
+    background: var(--gold2);
+    border-left: 4px solid var(--gold);
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    color: #5a4000;
+    display: none;
+  }
+  .hint-box.show { display: block; }
+
+  /* ── Section score panel ── */
+  .score-panel {
+    display: none;
+    background: #fff;
+    border: 2px solid var(--green);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    margin-top: 18px;
+  }
+  .score-panel.show { display: block; }
+  .score-panel h3 { font-size: 1.3rem; color: var(--green); margin-bottom: 8px; }
+  .score-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 12px auto;
+  }
+  .score-pass { background: #d4edda; color: var(--green); border: 4px solid var(--green); }
+  .score-fail { background: var(--pink2); color: var(--pink); border: 4px solid var(--pink); }
+  .score-panel p { color: #555; font-size: 0.92rem; margin-top: 6px; }
+  .retry-btn, .next-section-btn {
+    margin-top: 14px;
+    padding: 10px 22px;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .retry-btn        { background: var(--grey); color: var(--text); margin-right: 8px; }
+  .retry-btn:hover  { background: #ddd; }
+  .next-section-btn { background: var(--green2); color: #fff; }
+  .next-section-btn:hover { background: var(--green); }
+
+  /* ── Overall results ── */
+  #overall-results {
+    display: none;
+    max-width: 780px;
+    margin: 20px auto;
+    background: #fff;
+    border: 2px solid var(--green);
+    border-radius: var(--radius);
+    padding: 28px;
+    text-align: center;
+  }
+  #overall-results h2 { color: var(--green); font-size: 1.5rem; }
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+    text-align: left;
+  }
+  .result-card {
+    border: 1px solid #ddd;
+    border-radius: var(--radius);
+    padding: 12px;
+  }
+  .result-card .rc-name { font-weight: 700; font-size: 0.85rem; color: var(--green); }
+  .result-card .rc-score { font-size: 1.1rem; font-weight: 700; margin-top: 4px; }
+  .rc-pass { color: var(--green); }
+  .rc-fail { color: var(--pink); }
+  .restart-all-btn {
+    background: var(--green2);
+    color: #fff;
+    border: none;
+    padding: 11px 28px;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .restart-all-btn:hover { background: var(--green); }
+
+  @media (max-width: 540px) {
+    header h1 { font-size: 1.4rem; }
+    .question-block { padding: 14px 14px; }
+    .option-btn { font-size: 0.86rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="flower-strip">🌸 🌿 🌷 🌼 🌺</div>
+  <h1>City & Guilds Level 2 Floristry<br>Practice Theory Quiz</h1>
+  <p>Select a section below to begin. Hints available on every question.</p>
+</header>
+
+<div id="section-nav"></div>
+<div id="quiz-area"></div>
+<div id="overall-results"></div>
+
+<script>
+const SECTIONS = [
+  {
+    id: "colour-theory",
+    title: "Colour Theory",
+    subtitle: "The colour wheel, harmonies, and colour in floral design",
+    questions: [
+      {
+        q: "On the traditional colour wheel, what are the three PRIMARY colours?",
+        options: ["Red, orange, yellow", "Red, yellow, blue", "Red, green, blue", "Yellow, green, purple"],
+        answer: 1,
+        feedback: "Red, yellow, and blue are the primary colours in traditional (pigment-based) colour theory – they cannot be made by mixing other colours.",
+        hint: "These are the colours you cannot make by mixing other paint colours together."
+      },
+      {
+        q: "A COMPLEMENTARY colour scheme in floristry uses colours that are:",
+        options: ["Next to each other on the colour wheel", "Opposite each other on the colour wheel", "Three equally spaced hues on the colour wheel", "All tints of the same hue"],
+        answer: 1,
+        feedback: "Complementary colours sit directly opposite each other on the colour wheel (e.g. red/green, orange/blue). Together they create strong contrast.",
+        hint: "Think of which pairing creates the most visual 'pop' or contrast – they oppose each other."
+      },
+      {
+        q: "A MONOCHROMATIC colour scheme is based on:",
+        options: ["Three colours equally spaced around the colour wheel", "Two colours opposite each other", "One hue in varying tints, tones and shades", "Colours adjacent on the colour wheel"],
+        answer: 2,
+        feedback: "Monochromatic means one colour (mono = one, chroma = colour) using tints (+ white), shades (+ black) and tones (+ grey) of that single hue.",
+        hint: "'Mono' means one – so how many base hues are involved?"
+      },
+      {
+        q: "What is the term for a colour that has had BLACK added to it?",
+        options: ["Tint", "Tone", "Shade", "Hue"],
+        answer: 2,
+        feedback: "Adding black to a colour creates a SHADE. Adding white creates a TINT. Adding grey creates a TONE.",
+        hint: "Think: tint = lighter (white added), ___ = darker (black added)."
+      },
+      {
+        q: "Which colour harmony uses three colours equally spaced around the colour wheel?",
+        options: ["Analogous", "Complementary", "Triadic", "Split-complementary"],
+        answer: 2,
+        feedback: "A triadic scheme uses three hues exactly 120° apart on the colour wheel (e.g. red, yellow, blue), creating vibrant, balanced arrangements.",
+        hint: "'Tri' means three – which harmony specifically spaces three colours equally?"
+      },
+      {
+        q: "An ANALOGOUS colour scheme in floristry consists of colours that are:",
+        options: ["Opposite on the colour wheel", "Adjacent or next to each other on the colour wheel", "Black, white and grey only", "Three equally spaced on the colour wheel"],
+        answer: 1,
+        feedback: "Analogous colours sit side by side on the colour wheel (e.g. yellow, yellow-green, green). They create a harmonious, natural feel.",
+        hint: "Analogous means similar or related – where would similar colours sit on the wheel?"
+      },
+      {
+        q: "Which of the following is described as a WARM colour in floral design?",
+        options: ["Violet", "Blue", "Green", "Orange"],
+        answer: 3,
+        feedback: "Warm colours – red, orange, yellow – appear to advance towards the viewer and create energy and warmth in an arrangement.",
+        hint: "Warm colours remind us of fire and sunlight – red, yellow and…?"
+      },
+      {
+        q: "In colour theory, what does 'VALUE' refer to?",
+        options: ["The cost of the flowers used", "The brightness of a colour", "The lightness or darkness of a colour", "The saturation or purity of a colour"],
+        answer: 2,
+        feedback: "Value describes how light or dark a colour is on a scale from white to black. High value = light; low value = dark.",
+        hint: "Value is on a scale from light to dark – nothing to do with price."
+      },
+    ]
+  },
+  {
+    id: "design-elements",
+    title: "Elements of Design",
+    subtitle: "Line, form, texture, colour, space and size",
+    questions: [
+      {
+        q: "Which ELEMENT of design refers to the visual or tactile surface quality of plant material?",
+        options: ["Form", "Line", "Texture", "Space"],
+        answer: 2,
+        feedback: "Texture describes the surface quality – smooth, rough, velvety, spiky. In floristry it is perceived both visually and sometimes by touch.",
+        hint: "Think of how a rose petal feels versus a pine cone – that quality is described by which element?"
+      },
+      {
+        q: "In floral design, which type of LINE creates a feeling of calm and rest?",
+        options: ["Diagonal lines", "Horizontal lines", "Vertical lines", "Curved lines"],
+        answer: 1,
+        feedback: "Horizontal lines suggest the horizon and stability, giving an arrangement a calm, restful, natural feel.",
+        hint: "Horizontal relates to the horizon – which emotion does looking at a flat horizon evoke?"
+      },
+      {
+        q: "FOCAL FLOWERS in a floral design are typically:",
+        options: ["Small filler flowers spread evenly throughout", "The largest, most eye-catching blooms placed at the visual centre", "Foliage used to fill gaps", "Thin, elongated stems used to establish height"],
+        answer: 1,
+        feedback: "Focal (or point) flowers are large, bold blooms – such as open roses or gerbera – placed at the focal point to draw the eye.",
+        hint: "The word 'focal' tells you their role – they attract the eye to a central point."
+      },
+      {
+        q: "Which element of design refers to the three-dimensional outline or silhouette of plant material?",
+        options: ["Texture", "Colour", "Form", "Space"],
+        answer: 2,
+        feedback: "Form describes the three-dimensional shape of a flower or leaf (e.g. round form of a rose, linear form of a gladiolus).",
+        hint: "This element is about shape in three dimensions – the overall mass or silhouette."
+      },
+      {
+        q: "What role does FILLER material (e.g. gypsophila, waxflower) play in a floral design?",
+        options: ["Establishes the main height and structure", "Acts as a focal point", "Fills space and softens the overall outline", "Provides rigid framework"],
+        answer: 2,
+        feedback: "Filler flowers and foliage soften the design outline, fill gaps between focal and line materials, and add texture and depth.",
+        hint: "The clue is in the name – what does filler do to empty space?"
+      },
+      {
+        q: "NEGATIVE SPACE in a floral design refers to:",
+        options: ["Flowers that have died and need removing", "The empty or unfilled areas within or around the arrangement", "Dark-coloured flowers used for contrast", "Areas where colour is too dense"],
+        answer: 1,
+        feedback: "Negative space is the intentional empty space around and between materials. Used well, it gives the design breathing room and highlights the flowers.",
+        hint: "In art, 'negative' space is the area that is NOT filled – think of the gaps."
+      },
+      {
+        q: "Vertical line flowers (e.g. gladioli, delphiniums) are used primarily to:",
+        options: ["Add texture", "Establish height and directional movement", "Provide a focal point", "Create fragrance"],
+        answer: 1,
+        feedback: "Vertical line flowers set the height and silhouette of an arrangement, drawing the eye upwards and giving the design its overall proportion.",
+        hint: "Their tall, upright stems point in one direction – what does that contribute to a design?"
+      },
+    ]
+  },
+  {
+    id: "design-principles",
+    title: "Principles of Design",
+    subtitle: "Balance, proportion, scale, rhythm, dominance and contrast",
+    questions: [
+      {
+        q: "BALANCE in a floral design is the sense of:",
+        options: ["Equal weight or visual stability throughout the arrangement", "Repeating the same flower at regular intervals", "Using only one colour throughout", "Placing the tallest flower in the centre"],
+        answer: 0,
+        feedback: "Balance is the visual or physical equilibrium of an arrangement. It can be symmetrical (formal) or asymmetrical (informal/natural).",
+        hint: "It relates to the distribution of visual weight – does the design feel stable or about to topple?"
+      },
+      {
+        q: "PROPORTION in floristry refers to the relationship between:",
+        options: ["The number of red versus white flowers", "The size of the design and the size of its container", "The cost of flowers versus foliage", "The number of line flowers versus focal flowers"],
+        answer: 1,
+        feedback: "Proportion describes the pleasing relationship in size between the arrangement and its container, and between elements within the design.",
+        hint: "A tiny posy in a massive vase would look 'out of ___' – which principle is that?"
+      },
+      {
+        q: "DOMINANCE in floral design means:",
+        options: ["Using one strong flower, colour, or texture to create a visual focus", "Using equal amounts of every element", "Placing only one flower type in an arrangement", "Making all flowers the same height"],
+        answer: 0,
+        feedback: "Dominance ensures one element (a flower, colour, or texture) is used more than others, creating a clear focal interest and preventing a cluttered look.",
+        hint: "One element leads or 'dominates' – why might that be important for visual clarity?"
+      },
+      {
+        q: "RHYTHM in a floral design is achieved by:",
+        options: ["Placing materials randomly for a natural effect", "Repeating shapes, colours or textures to create a sense of movement", "Using only straight lines", "Balancing two identical halves"],
+        answer: 1,
+        feedback: "Rhythm is created through repetition of elements – a recurring colour, shape, or texture that leads the eye through the arrangement.",
+        hint: "In music, rhythm comes from repetition of beats – the same idea applies in design."
+      },
+      {
+        q: "CONTRAST in a floral design is the principle that creates visual interest by:",
+        options: ["Repeating identical elements throughout", "Placing dissimilar elements such as different textures or opposing colours together", "Making all elements the same size", "Using only one material type"],
+        answer: 1,
+        feedback: "Contrast uses difference – rough next to smooth, large next to small, warm colour next to cool – to create excitement and prevent monotony.",
+        hint: "Contrast means difference – pairing opposites creates what kind of visual effect?"
+      },
+      {
+        q: "A FORMAL BALANCED (symmetrical) arrangement has:",
+        options: ["Different materials on each side creating visual balance", "Mirror-image material placement on both sides of a central axis", "No clear focal point", "Materials placed at random to appear natural"],
+        answer: 1,
+        feedback: "Formal/symmetrical balance means both sides are mirror images. It creates a structured, traditional look used in formal events and funerals.",
+        hint: "Formal balance is symmetrical – what does that mean for the two sides of the design?"
+      },
+      {
+        q: "The principle of SCALE refers to:",
+        options: ["The cost per stem of plant material", "The appropriateness of the size of elements in relation to each other and the setting", "The weight of an arrangement", "The pH balance of water used"],
+        answer: 1,
+        feedback: "Scale is about size relationships being appropriate – delicate flowers on a small table, bold large-headed flowers in a church – so the design suits its context.",
+        hint: "A tiny buttonhole at a large formal banquet would be 'out of ___' – which principle?"
+      },
+    ]
+  }
+];
+
+// ── State ──────────────────────────────────────────────────────────────
+const state = {
+  currentSection: 0,
+  sectionScores: {},   // id → { correct, total }
+  answered: {},        // "sectionId-qIndex" → chosen index
+  hintsShown: {},
+};
+
+// ── Render section nav ─────────────────────────────────────────────────
+function renderNav() {
+  const nav = document.getElementById('section-nav');
+  nav.innerHTML = '';
+  SECTIONS.forEach((sec, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' +
+      (i === state.currentSection ? ' active' : '') +
+      (state.sectionScores[sec.id] !== undefined ? ' done' : '');
+    btn.textContent = sec.title;
+    btn.onclick = () => { state.currentSection = i; render(); };
+    nav.appendChild(btn);
+  });
+}
+
+// ── Render quiz area ───────────────────────────────────────────────────
+function render() {
+  renderNav();
+  const sec = SECTIONS[state.currentSection];
+  const scored = state.sectionScores[sec.id];
+  const totalAnswered = sec.questions.filter((_, qi) =>
+    state.answered[`${sec.id}-${qi}`] !== undefined).length;
+
+  const area = document.getElementById('quiz-area');
+  area.innerHTML = '';
+
+  // header
+  const hdr = document.createElement('div');
+  hdr.className = 'section-header';
+  hdr.innerHTML = `
+    <h2>${sec.title}</h2>
+    <p>${sec.subtitle} &nbsp;|&nbsp; ${sec.questions.length} questions</p>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" style="width:${(totalAnswered/sec.questions.length)*100}%"></div>
+    </div>`;
+  area.appendChild(hdr);
+
+  // questions
+  sec.questions.forEach((q, qi) => {
+    const key = `${sec.id}-${qi}`;
+    const chosen = state.answered[key];
+    const isAnswered = chosen !== undefined;
+    const isCorrect = chosen === q.answer;
+
+    const block = document.createElement('div');
+    block.className = 'question-block';
+    block.innerHTML = `
+      <div class="q-number">Question ${qi + 1} of ${sec.questions.length}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">
+        ${q.options.map((opt, oi) => {
+          let cls = '';
+          if (isAnswered) {
+            if (oi === q.answer)  cls = 'correct';
+            else if (oi === chosen) cls = 'wrong';
+          }
+          return `<button class="option-btn ${cls}" data-qi="${qi}" data-oi="${oi}"
+            ${isAnswered ? 'disabled' : ''}>
+            <span class="opt-label">${String.fromCharCode(65+oi)}</span>
+            <span>${opt}</span>
+          </button>`;
+        }).join('')}
+      </div>
+      <button class="hint-btn" data-hkey="${key}">💡 Show hint</button>
+      <div class="hint-box ${state.hintsShown[key] ? 'show' : ''}" id="hint-${key}">${q.hint}</div>
+      <div class="feedback ${isAnswered ? (isCorrect ? 'correct-fb' : 'wrong-fb') + ' show' : ''}"
+           id="fb-${key}">
+        ${isAnswered ? (isCorrect ? '✅ Correct! ' : '❌ Not quite. ') + q.feedback : ''}
+      </div>`;
+    area.appendChild(block);
+  });
+
+  // score panel
+  const panel = document.createElement('div');
+  panel.className = 'score-panel' + (scored !== undefined ? ' show' : '');
+  if (scored !== undefined) {
+    const pct = Math.round((scored.correct / scored.total) * 100);
+    const pass = pct >= 50;
+    panel.innerHTML = `
+      <h3>Section Complete!</h3>
+      <div class="score-circle ${pass ? 'score-pass' : 'score-fail'}">${pct}%</div>
+      <p>You scored <strong>${scored.correct} / ${scored.total}</strong>
+         &nbsp;–&nbsp; ${pass ? '🌸 Well done, that\'s a pass!' : '🌿 Keep practising – review the hints above.'}</p>
+      <div style="margin-top:14px">
+        <button class="retry-btn" onclick="retrySection(${state.currentSection})">↺ Retry section</button>
+        ${state.currentSection < SECTIONS.length - 1
+          ? `<button class="next-section-btn" onclick="goNextSection()">Next section →</button>`
+          : `<button class="next-section-btn" onclick="showOverall()">See overall results 🌺</button>`}
+      </div>`;
+  } else if (totalAnswered === sec.questions.length) {
+    // all answered but score not yet calculated – auto-score
+    scoreSection(state.currentSection);
+    return render();
+  }
+  area.appendChild(panel);
+
+  // attach events
+  area.querySelectorAll('.option-btn:not([disabled])').forEach(btn => {
+    btn.addEventListener('click', () => answerQuestion(btn.dataset.qi, btn.dataset.oi));
+  });
+  area.querySelectorAll('.hint-btn').forEach(btn => {
+    btn.addEventListener('click', () => toggleHint(btn.dataset.hkey));
+  });
+}
+
+function answerQuestion(qi, oi) {
+  const sec = SECTIONS[state.currentSection];
+  const key = `${sec.id}-${qi}`;
+  state.answered[key] = parseInt(oi);
+  render();
+  // scroll answered question into view
+  const block = document.querySelectorAll('.question-block')[parseInt(qi)];
+  if (block) block.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function toggleHint(hkey) {
+  state.hintsShown[hkey] = !state.hintsShown[hkey];
+  const box = document.getElementById(`hint-${hkey}`);
+  if (box) box.classList.toggle('show', state.hintsShown[hkey]);
+}
+
+function scoreSection(idx) {
+  const sec = SECTIONS[idx];
+  let correct = 0;
+  sec.questions.forEach((q, qi) => {
+    if (state.answered[`${sec.id}-${qi}`] === q.answer) correct++;
+  });
+  state.sectionScores[sec.id] = { correct, total: sec.questions.length };
+}
+
+function retrySection(idx) {
+  const sec = SECTIONS[idx];
+  sec.questions.forEach((_, qi) => {
+    delete state.answered[`${sec.id}-${qi}`];
+  });
+  delete state.sectionScores[sec.id];
+  render();
+}
+
+function goNextSection() {
+  state.currentSection = Math.min(state.currentSection + 1, SECTIONS.length - 1);
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showOverall() {
+  document.getElementById('quiz-area').style.display = 'none';
+  document.getElementById('section-nav').style.display = 'none';
+  const div = document.getElementById('overall-results');
+  div.style.display = 'block';
+
+  let totalCorrect = 0, totalQ = 0;
+  const cards = SECTIONS.map(sec => {
+    const s = state.sectionScores[sec.id] || { correct: 0, total: sec.questions.length };
+    totalCorrect += s.correct; totalQ += s.total;
+    const pct = Math.round((s.correct / s.total) * 100);
+    return `<div class="result-card">
+      <div class="rc-name">${sec.title}</div>
+      <div class="rc-score ${pct >= 50 ? 'rc-pass' : 'rc-fail'}">${s.correct}/${s.total} (${pct}%)</div>
+    </div>`;
+  }).join('');
+
+  const overall = Math.round((totalCorrect / totalQ) * 100);
+  const pass = overall >= 50;
+  div.innerHTML = `
+    <div class="flower-strip">🌸 🌿 🌷 🌼 🌺</div>
+    <h2>Overall Results</h2>
+    <div class="score-circle ${pass ? 'score-pass' : 'score-fail'}" style="margin:16px auto;display:flex">
+      ${overall}%
+    </div>
+    <p><strong>${totalCorrect} correct out of ${totalQ} questions</strong></p>
+    <p style="margin-top:8px">${pass ? '🌸 Great work, Sharon! Keep it up.' : '🌿 More practice needed – use the hints to review.'}</p>
+    <div class="results-grid">${cards}</div>
+    <button class="restart-all-btn" onclick="restartAll()">↺ Start again</button>`;
+}
+
+function restartAll() {
+  Object.assign(state, { currentSection: 0, sectionScores: {}, answered: {}, hintsShown: {} });
+  document.getElementById('quiz-area').style.display = '';
+  document.getElementById('section-nav').style.display = '';
+  document.getElementById('overall-results').style.display = 'none';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
